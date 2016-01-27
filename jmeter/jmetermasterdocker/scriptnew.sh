@@ -1,5 +1,6 @@
 #!/bin/bash
-
+#unset -f arrayname;
+declare -a arrayname=();
 
 export workspace=$1
 export number=$2
@@ -11,52 +12,49 @@ docker pull www.cybage-docker-registry.com:9080/jmetermaster01
 
 echo $2;
 
-
-
 #export host=dev.alm-task-manager.com
 
 
-a=0
-ip=''
+b=0;
+ip='';
 
+#declare -a arrayname=();
 
+#declare -a arrayname=();
 
-
-
-while [ $a -lt $2 ]
+while [ $b -lt $2 ]
 do
-  echo $a
+  echo $b
 
 
-  docker run --name jmeterslave$a -d  -e HOSTNAMES=$hostname -e HOSTIP=$hostip www.cybage-docker-registry.com:9080/jmeterslave00
+docker run --name jmeterslave$b -d  -e HOSTNAMES=$hostname -e HOSTIP=$hostip www.cybage-docker-registry.com:9080/jmeterslave00
+sleep 10s;
+echo "fetching slave containers IP and storing it into variable a and variable b";
+echo  $(docker inspect --format '{{ .NetworkSettings.IPAddress }}' jmeterslave$b )
 
-  echo "fetching slave containers IP and storing it into variable a and variable b";
-echo  $(docker inspect --format '{{ .NetworkSettings.IPAddress }}' jmeterslave$a )
 
-if [ $(docker inspect --format '{{ .NetworkSettings.IPAddress }}' jmeterslave$a ) =  "  0" ] ; then
+
+if [ -z  $(docker inspect --format '{{ .NetworkSettings.IPAddress }}' jmeterslave$b ) ] ; then
 echo "slave not up "
+b=`expr $b + 1`
+#break;
 
-
-
-break;
+else
+ipnew=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' jmeterslave$b )
+arrayname=("${arrayname[@]}" "$ipnew");
+  #export host=dev.alm-task-manager.com
+   b=`expr $b + 1`
 
 fi
-
-
-
-
-  ip=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' jmeterslave$a ),$ip
-echo $ip;
-
-
-
-  #export host=dev.alm-task-manager.com
-   a=`expr $a + 1`
-
 done
 
+
+x=$(IFS=,;printf  "%s" "${arrayname[*]}")
+echo "$x"
+
+
 echo "hiiiiiiiiiiiiiiiiiiiiiiii"
-echo $ip;
+echo $x;
 
 
 
@@ -92,12 +90,20 @@ echo -e "\t\n\n\n\n\n\n\t ###############################################";
 echo $ip;
 echo -e "\t\n\n\n\n\n\n\t #######value of $p ########################################";
 
-ip1=${ip%?}
+#ip1=${ip%?}
 
-echo $ip1
+#echo $ip1
 #docker run --name jmetermaster -d -v $workspace:/reports -e IP=$ip -e HOSTIP=$hostip  HOST_NAMES=$hostname  www.cybage-docker-registry.com:9080/jmetermaster00
 
-docker run --name jmetermaster -d -v $workspace:/reports -e IP=$ip1 -e HOSTIP=$hostip -e  HOSTNAME=$hostname  www.cybage-docker-registry.com:9080/jmetermaster01
+
+if [ -z $x ]
+then
+echo "no container available " 
+echo $x;
+exit 1
+fi
+
+docker run --name jmetermaster -d -v $workspace:/reports -e IP=$x -e HOSTIP=$hostip -e  HOSTNAME=$hostname  www.cybage-docker-registry.com:9080/jmetermaster01
 
 
 

@@ -18,7 +18,7 @@ echo -e "#######################################################################
 echo -e "######################################### Running Shell script ########################################################################";
 echo -e "\t\t\t\n";
 sudo chmod +x scriptnew.sh
-sudo sh scriptnew.sh $WORKSPACE $SlavesNumber $hostip $hostname
+sudo bash scriptnew.sh $WORKSPACE $SlavesNumber $hostip $hostname
 echo -e "\t\t\t\n";
 echo -e "######################################### End of Shell script #############################################################################";
 
