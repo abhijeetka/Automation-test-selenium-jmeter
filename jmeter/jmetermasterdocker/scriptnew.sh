@@ -2,6 +2,10 @@
 #unset -f arrayname;
 declare -a arrayname=();
 
+#to remove all unstopped  jmeter containers of image jmeter
+docker rm -f -v $(docker ps -a -q -f image=jmeter*)
+
+
 export workspace=$1
 export number=$2
 export hostip=$3
